@@ -4,7 +4,9 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
-
+import { useSelector, useDispatch } from 'react-redux';
+import Card from './ContactDetails'
+import { getUserById } from '../redux/action'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -19,28 +21,44 @@ inline: {
 },
 text: {
     marginLeft: '20px',
+},
+card: {
+    display: 'flex',
+    justifyContent: 'center'
 }
 }));
 
 export default function ContactList() {
     const classes = useStyles();
-    const [users, setUsers ] = useState([])
-    
+    const [user, setUser ] = useState(true)
+
+    const favouriteUser = useSelector(state => state.favouriteUser)
+    const dispatch = useDispatch()
+
+    function showUser (oneUser) {
+        dispatch(getUserById(oneUser.id))
+        setUser(false);
+
+    }
     return (
-        <List className={classes.root}>
-            {
-            users.map(user => {
-                    return(
-                        <ListItem alignItems="flex-start" key={user.id} className={classes.inline} >
-                            <Avatar alt="Remy Sharp" src={user.avatar} />
-                            <ListItemText className={classes.text}>
-                                {user.first_name} {user.last_name}
-                            </ListItemText>
-                        </ListItem>
-                    )
-                })
-            }
-            hi FavouriteList
-        </List>
+        <>
+            <List className={classes.root}>
+                { user &&
+                favouriteUser.map(user => {
+                        return(
+                            <ListItem alignItems="flex-start" key={user.id} className={classes.inline} onClick={()=>showUser(user)}>
+                                <Avatar alt="Remy Sharp" src={user.avatar} />
+                                <ListItemText className={classes.text}>
+                                    {user.first_name} {user.last_name}
+                                </ListItemText>
+                            </ListItem>
+                        )
+                    })
+                }
+            </List>
+            <div className={classes.card}>
+                {!user && <Card /> }
+            </div>
+        </>
     );
 }

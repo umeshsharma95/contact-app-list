@@ -4,8 +4,8 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
-import MediaCard from './ContactDetails'
-import { useSelector } from 'react-redux'
+import Card from './ContactDetails'
+import { useSelector, useDispatch } from 'react-redux'
 import { getUsers, getUserById } from '../redux/action'
 
 
@@ -22,32 +22,35 @@ inline: {
 },
 text: {
     marginLeft: '20px',
+},
+card: {
+    display: 'flex',
+    justifyContent: 'center'
 }
+
 }));
 
 export default function ContactList() {
     const classes = useStyles();
-    // const [users, setUsers ] = useState([])
-    const [user, setUser ] = useState()
+    const [user, setUser ] = useState(true)
     const users = useSelector(state => state.users)
-    getUsers()
+    const dispatch = useDispatch()
     useEffect(() => {
-        getUserById()
-        console.log(users)
-
-    }, [])
-    const showDetails = (oneUser) => {
-        console.log(oneUser)
-        setUser(oneUser)       
+        dispatch(getUsers())
+    }, []);
+    
+    function showUser (oneUser) {
+        dispatch(getUserById(oneUser.id))
+        setUser(false);
     }
     
     return (
         <>
         <List className={classes.root}>
             {
-            users.map(user => {
+            user && users.map(user => {
                     return(
-                        <ListItem alignItems="flex-start" key={user.id} className={classes.inline} onClick={()=>showDetails(user)}>
+                        <ListItem alignItems="flex-start" key={user.id} className={classes.inline} onClick={()=>showUser(user)}>
                             <Avatar alt="Remy Sharp" src={user.avatar} />
                             <ListItemText className={classes.text}>
                                 {user.first_name} {user.last_name}
@@ -56,9 +59,10 @@ export default function ContactList() {
                     )
                 })
             }
-            {users}
         </List>
-        {/* {user && <MediaCard user={user}/> } */}
+        <div className={classes.card}>
+            {!user && <Card /> }
+        </div>
         </>
     );
 }

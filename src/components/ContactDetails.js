@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -6,13 +6,16 @@ import CardActions from '@material-ui/core/CardActions';
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Link from '@material-ui/core/Link';
-import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
-import axios from '../api/axios'
 import Avatar from '@material-ui/core/Avatar';
 import EmailIcon from '@material-ui/icons/Email';
+import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import { useSelector , useDispatch } from 'react-redux';
+import { addFavourite, removeFavourite } from '../redux/action'
 
-const useStyles = makeStyles({
+
+const useStyles = makeStyles((theme) => ({
   root: {
     maxWidth: 345,
   },
@@ -24,29 +27,40 @@ const useStyles = makeStyles({
       marginTop: '-70px',
       width: '120px',
       height: '120px',
-      marginBottom : 30
-  }
-});
+      marginBottom : 20
+  },
 
-export default function MediaCard({ user }) {
+  email: {
+    display: 'flex',
+    margin: '10px',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  bottom: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    cursor: 'pointer'
+  },
+  space: {
+   marginRight : theme.spacing(1),
+  },  
+
+}));
+
+export default function ContactCard() {
   const classes = useStyles();
-  const [person, setPerson ] = useState()
-
-  useEffect(() => {
-    async function getUser () {
-        let id = '' + user.id;
-        
-        let { data } = await axios.get(id)
-        console.log(person, data)
-        setPerson(data);
-        }
-        getUser();
-    }, [user])
-    
+  const person = useSelector(state => state.user);
+  const favourite = useSelector(state => state.favouriteUser);
+  const dispatch = useDispatch();
+  function addFavour (person) {
+    const { data } = person;
+    let isFavourite = favourite.some(user => user.id === data.id)
+    !isFavourite && dispatch(addFavourite(data))
+    isFavourite && dispatch(removeFavourite(data))
+  }
 
   return (
-      person ?
-    (<Card className={classes.root}>
+     Object.keys(person).length && (<Card className={classes.root}>
       <CardActionArea>
         <CardMedia
           className={classes.media}
@@ -61,19 +75,22 @@ export default function MediaCard({ user }) {
           <Typography variant="body2" color="textSecondary" component="p">
             {person.support.text}
           </Typography>
-          <Typography variant="body2" color="textPrimary" component="p">
-            <EmailIcon/> {person.data.email}
+          <Typography variant="body2" color="textPrimary" component="p" className={classes.email}>
+            <EmailIcon className={classes.space} /> {person.data.email}
           </Typography>
         </CardContent>
       </CardActionArea>
-      <CardActions>
-        <Button size="small" color="primary">
-          Add to Favourite
-        </Button>
+      <CardActions className={classes.bottom}>
+        <Typography variant="body2" component="p" color="textPrimary" className={classes.email} onClick={() => addFavour(person)}>
+          {favourite.some(user => user.id === person.data.id) ? 
+          <FavoriteIcon color="secondary" fontSize="large" /> 
+          : <FavoriteBorderIcon color="secondary" fontSize="large" /> }           
+          Add To Favourite
+        </Typography>
         <Link href={person.support.url}>
           Support US
         </Link>
       </CardActions>
-    </Card>) : "Loading..."
-  );
+    </Card>)
+    ); 
 }

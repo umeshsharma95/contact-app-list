@@ -44,7 +44,6 @@ function a11yProps(index) {
   };
 }
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     margin: "10px 110px",
@@ -65,6 +64,7 @@ export default function Home() {
     const handleChange = (event, newValue) => {
       setValue(newValue);
     };
+
     return (
         <div >
             <AppBar position="static">

@@ -7,6 +7,8 @@ import Avatar from '@material-ui/core/Avatar';
 import { useSelector, useDispatch } from 'react-redux';
 import Card from './ContactDetails'
 import { getUserById } from '../redux/action'
+import Modal from '@material-ui/core/Modal';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -22,28 +24,49 @@ inline: {
 text: {
     marginLeft: '20px',
 },
-card: {
-    display: 'flex',
-    justifyContent: 'center'
-}
+paper: {
+    position: 'absolute',
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+  },
 }));
+
+function getModalStyle() {
+  const top = 50 ;
+  const left = 50 ;
+
+  return {
+    top: `${top}%`,
+    left: `${left}%`,
+    transform: `translate(-${top}%, -${left}%)`,
+  };
+}
 
 export default function ContactList() {
     const classes = useStyles();
-    const [user, setUser ] = useState(true)
-
+    const [modalStyle] = useState(getModalStyle);
+    const [open, setOpen] = useState(false);
     const favouriteUser = useSelector(state => state.favouriteUser)
     const dispatch = useDispatch()
 
     function showUser (oneUser) {
         dispatch(getUserById(oneUser.id))
-        setUser(false);
-
+        handleOpen()
     }
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
     return (
         <>
             <List className={classes.root}>
-                { user &&
+                {
                 favouriteUser.map(user => {
                         return(
                             <ListItem alignItems="flex-start" key={user.id} className={classes.inline} onClick={()=>showUser(user)}>
@@ -56,9 +79,14 @@ export default function ContactList() {
                     })
                 }
             </List>
-            <div className={classes.card}>
-                {!user && <Card /> }
-            </div>
+            <Modal
+                open={open}
+                onClose={handleClose}
+            >
+                <div style={modalStyle} className={classes.paper}>
+                    <Card />
+                </div>
+            </Modal>
         </>
     );
 }
